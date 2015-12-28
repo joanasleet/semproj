@@ -1,4 +1,0 @@
-Installiere folgende Pakete:
-    git
-    python-aiml
-    python-sparqlwrapper
