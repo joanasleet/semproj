@@ -1,6 +1,0 @@
-Wetter
-Jahreszeit
-sicherheit ( Kriminalitaet / Terrorismus )
-Groesse ( Stadt )
-Typ ( Strand / Schnee / Wald )
-Kosten ( Flug / generell )
