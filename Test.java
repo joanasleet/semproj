@@ -4,7 +4,7 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 
 public class Test {
 
-    final static String WIKI_VOYAGE_EN = "https://en.wikivoyage.org/w/api.php";
+    final static String WIKI_VOYAGE_EN = "https://de.wikivoyage.org/w/api.php";
 
     public static void main(String[] args) {
 

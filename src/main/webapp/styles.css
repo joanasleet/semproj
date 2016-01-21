@@ -1,0 +1,39 @@
+html {
+    background-color: whitesmoke;
+}
+
+#title {
+    padding: 20px;
+    text-align: center;
+}
+
+
+#emma {
+    padding-bottom: 10px;
+}
+
+#emmaTag {
+    color: darkblue;
+}
+
+#emmaText {
+    display: none;
+    vertical-align: bottom;
+}
+
+#emmaTyping {
+    display: none;
+    vertical-align: bottom;
+}
+
+
+
+#content {
+    width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#userText > input {
+    width: 50%;
+}
