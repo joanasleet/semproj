@@ -13,10 +13,9 @@ public class EmmaServlet extends HttpServlet {
 
     private static final String HTTP_INPUT_PARAM = "input";
 
-    private Emma emma;
+    // TODO: make one Emma per session
+    private final Emma emma;
 
-    // TODO: Test ob mehrere Instanzen erzeugt werden
-    // - sollte aber nicht ?_?
     public EmmaServlet() {
         super();
         emma = new Emma();

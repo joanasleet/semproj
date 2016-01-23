@@ -31,7 +31,6 @@ public class CBrainWahl {
     private static String popsize;
     private static String temp;
     private static String beach;
-    
 
     public static boolean spell(String wort, String check) {
         int counter = 0;

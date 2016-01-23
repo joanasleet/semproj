@@ -1,19 +1,38 @@
 html {
-    background-color: whitesmoke;
+    background-color: #288ad6;
+}
+
+body {
+    margin: 0;
 }
 
 #title {
+    margin: 0;
     padding: 20px;
     text-align: center;
+
+    font-size: 4em;
+    font-family: 'Caveat', cursive;
+    font-weight: inherit;
+
+    background-color: #CEE8FF;
+}   
+
+#earth {
+    height: 75px;
+    vertical-align: sub;
 }
 
+#emmaTitle {
+    color: #fa5e5b;
+}
 
 #emma {
     padding-bottom: 10px;
 }
 
 #emmaTag {
-    color: darkblue;
+    color: #fa5e5b;
 }
 
 #emmaText {
@@ -26,14 +45,19 @@ html {
     vertical-align: bottom;
 }
 
-
-
 #content {
     width: 700px;
+    padding: 1em;
+    margin-top: 5em;
     margin-left: auto;
     margin-right: auto;
+    background-color: #92CCFF;
+    border-radius: 10px 10px 10px 10px;
+
+    font-size: 1.5em;
 }
 
 #userText > input {
     width: 50%;
+    vertical-align: middle;
 }

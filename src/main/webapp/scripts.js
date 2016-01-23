@@ -1,27 +1,43 @@
 $(document).ready(function () {
 
-    $("#emmaText").fadeIn(1000);
+    var service = "emma";
+
+    var loader = $("#emmaTyping");
+    var emmaText = $("#emmaText");
+    var userInput = $("#userText>input");
+
+    var requestDelay = 400;
+
+    emmaText.load(service, {input: ""}).fadeIn(2000);
 
     /* user text submit */
-    $("#userText").bind("enterKey", function (event) {
-        var userInput = $("#userText>input").val();
-        $("#emmaText").fadeOut(1000, function () {
-            $("#emmaText").fadeIn(1000);
-        });
-        $("#emmaText").load("emma", {input: userInput}, function () {
-            $("#emmaTyping").fadeOut(500, function () {
-                $("#emmaText").fadeIn(500);
+    userInput.bind("enterKey", function (event) {
+
+        /* disable input */
+        userInput.prop("disabled", true);
+        emmaText.fadeOut(requestDelay, function () {
+
+            var inputVal = userInput.val();
+
+            /* show loading gif */
+            loader.fadeIn(requestDelay, function () {
+
+                /* do request and preset result */
+                emmaText.load(service, {input: inputVal}, function () {
+                    loader.fadeOut(requestDelay, function () {
+                        emmaText.fadeIn(requestDelay);
+                        userInput.prop("disabled", false);
+                    });
+                });
             });
         });
     });
 
-    $("#userText").keyup(function (event) {
+    userInput.keyup(function (event) {
         if (event.keyCode === 13) {
             $(this).trigger("enterKey");
         }
     });
-
-
 });
 
 
