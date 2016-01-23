@@ -27,6 +27,7 @@ $(document).ready(function () {
                     loader.fadeOut(requestDelay, function () {
                         emmaText.fadeIn(requestDelay);
                         userInput.prop("disabled", false);
+			userInput.focus();
                     });
                 });
             });
