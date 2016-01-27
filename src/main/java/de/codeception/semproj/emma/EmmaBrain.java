@@ -19,6 +19,9 @@
 package de.codeception.semproj.emma;
 
 import de.codeception.semproj.knowledge.KnowledgeBase;
+import static de.codeception.semproj.knowledge.Util.has;
+import static de.codeception.semproj.knowledge.Util.rand;
+import static de.codeception.semproj.knowledge.Util.matchNot;
 
 public class EmmaBrain {
 
@@ -76,9 +79,9 @@ public class EmmaBrain {
             /* greet, what does the bot do */
             case INIT:
                 state = State.ASK_IF_TRAVEL;
-                return "Hi, I'm Emma. Do you wanna build a snowmaaan ?[PH]";
+                return "Hi, I'm Emma. I can help you find a travel destination.";
 
-            /* TODO */
+            /* TODO: maybe */
             case USER_NAME:
                 username = matchNot(input, "(Hi|,|I'm|I|am|my|name|is)");
                 state = State.ASK_IF_TRAVEL;
@@ -171,8 +174,6 @@ public class EmmaBrain {
                             "Good choice. Do you want a city where the temperatures are over 20 degrees in " + season + " ?",
                             "Ok ... next question: Should I search for a city where it's hot in " + season + " ?",
                             "Yay! " + season + " is my fav season ... now I need to know if you want hot weather during this season ?");
-                } else {
-                    // TODO: dont care
                 }
                 return "I am pretty sure that this is not the answer to my question or maybe you missspelled"
                         + " something  ... Please answer it again: summer, autumn, spring or winter ?";
@@ -187,8 +188,6 @@ public class EmmaBrain {
                             + " ... Nevermind .. is a big city good for you ?",
                             "And how about the size of the city .. should it be a big crowded city ?"
                     );
-                } else {
-                    // TODO: dont care
                 }
                 return "Interesting, but please answer my question ... "
                         + "I need to know the answer.. Should it be hot in  " + season + " ?";
@@ -222,27 +221,5 @@ public class EmmaBrain {
             default:
                 return "I'm confused, call a doctor.";
         }
-    }
-
-    private static String rand(String... strings) {
-        int random = (int) (Math.random() * strings.length);
-        return strings[random];
-    }
-
-    private static boolean has(String target, String... oneOfThese) {
-        for (String s : oneOfThese) {
-            if (target.contains(s)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static String matchNot(String s, String what) {
-        String regex = String.format("^(?!.*%s).*$", what);
-        if (s.matches(regex)) {
-            return s.replaceAll(regex, "");
-        }
-        return null;
     }
 }

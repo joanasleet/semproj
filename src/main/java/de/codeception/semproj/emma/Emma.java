@@ -9,7 +9,7 @@ public class Emma {
     }
 
     public String address(String query) {
-        return brain.process(query.toLowerCase());
+        return brain.process(query.trim());
     }
 
 }

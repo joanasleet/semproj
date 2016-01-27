@@ -8,7 +8,7 @@ body {
 
 #title {
     margin: 0;
-    padding: 20px;
+    padding: 0.5em;
     text-align: center;
 
     font-size: 4em;
@@ -29,6 +29,7 @@ body {
 
 #emma {
     padding-bottom: 10px;
+    text-align: justify;
 }
 
 #emmaTag {
@@ -42,13 +43,14 @@ body {
 
 #emmaTyping {
     display: none;
-    vertical-align: bottom;
+    /*vertical-align: bottom;*/
+    height: 0.5em;
 }
 
 #content {
     width: 700px;
     padding: 1em;
-    margin-top: 5em;
+    margin-top: 4em;
     margin-left: auto;
     margin-right: auto;
     background-color: #92CCFF;

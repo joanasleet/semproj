@@ -26,7 +26,7 @@ import java.util.Scanner;
 
 public class CBrain {
 
-    public static void main(String[] args) {
+    public static void _main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         String s = "";
         boolean decis = false;
