@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Julia <julia@julia-laptop>
+ * Copyright 2015 Julia <julia@julia-laptop>, <alex@codeception.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,15 +61,12 @@ public class EmmaBrain {
     private String size;
     private String tempr;
     private String season;
-    private String origin;
     private String continent;
 
     public EmmaBrain() {
-        username = null;
         state = State.INIT;
     }
 
-    /* input string is lower cased ?? */
     public String process(String input) {
 
         System.out.println("State: " + state + " Input: " + input);
@@ -215,11 +212,18 @@ public class EmmaBrain {
                 return "Hmmmmm .... I am not sure if that is the answer to my question ... my question was: "
                         + "Do you wanna stay in Europe, America, Asia, Australia or Africa ?";
 
-            case CHOOSE_ORIGIN:
-                return "|PH| Answer question to user origin.";
-
             default:
                 return "I'm confused, call a doctor.";
         }
     }
 }
+
+/* TODO:
+- remove choices from questions
+- add random defaults to criteria if user doesnt care - tell user about it
+- change questions to reflect how criteria are chosen
+- make new globe image
+- input in some states need to be lower cased
+- ask questions about city
+- the big query to bind them all
+ */
