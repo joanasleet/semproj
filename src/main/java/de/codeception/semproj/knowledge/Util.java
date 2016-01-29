@@ -41,7 +41,7 @@ public class Util {
         String m;
         try (Scanner scan = new Scanner(s)) {
             m = scan.findInLine(regex);
-            
+
         }
         return m;
     }
@@ -56,7 +56,15 @@ public class Util {
         }
     }
 
-//    public static void main(String[] args) {
-//        
-//    }
+    public static String capitalize(String s) {
+
+        StringBuilder capit = new StringBuilder(s.toLowerCase());
+        capit.setCharAt(0, s.toUpperCase().charAt(0));
+        return capit.toString();
+    }
+
+    public static String sanitize(String s) {
+
+        return null;
+    }
 }

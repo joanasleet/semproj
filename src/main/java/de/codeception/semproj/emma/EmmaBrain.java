@@ -30,7 +30,6 @@ public class EmmaBrain {
         /* context info */
         INIT,
         GREET,
-        USER_NAME,
         USER_HAS_CITY,
         USER_NO_TRAVEL,
         END,
@@ -63,6 +62,9 @@ public class EmmaBrain {
     private String season;
     private String continent;
 
+    /* wiki article of city */
+    private String cityWiki;
+
     public EmmaBrain() {
         state = State.INIT;
     }
@@ -73,25 +75,28 @@ public class EmmaBrain {
 
         switch (state) {
 
-            /* greet, what does the bot do */
-            case INIT:
+            /*
+             * greet user, explain bots function
+             */
+            case INIT: {
                 state = State.ASK_IF_TRAVEL;
                 return "Hi, I'm Emma. I can help you find a travel destination.";
+            }
 
-            /* TODO: maybe */
-            case USER_NAME:
-                username = matchNot(input, "(Hi|,|I'm|I|am|my|name|is)");
-                state = State.ASK_IF_TRAVEL;
-                return process(null);
-
-            /* disable user input in ui */
-            case ASK_IF_TRAVEL:
+            /*
+             * does user even need bot 
+             */
+            case ASK_IF_TRAVEL: {
                 state = State.ASK_IF_TRAVEL_WAIT_FOR_ANSWER;
                 if (username != null) {
                     return username + ", do you wanna go on a journey in the near future ?";
                 }
                 return "Do you wanna go on a journey in the near future ?";
+            }
 
+            /*
+             * get answer for above 
+             */
             case ASK_IF_TRAVEL_WAIT_FOR_ANSWER: {
                 if (has(input, "yes", "yep", "yo", "yeah", "of course", "sure")) {
                     state = State.USER_WANTS_TRAVEL;
@@ -103,7 +108,7 @@ public class EmmaBrain {
                 }
                 if (has(input, "don't know", "dunno", "do not know", "maybe",
                         "have not decide", "not sure", "dont know")) {
-                    state = State.USER_WANTS_TRAVEL; // ?? user doesnt know IF he wants to travel
+                    state = State.USER_WANTS_TRAVEL; // suggest one anyway
                     return rand(
                             "I can help you to choose a city and make a decision then. "
                             + "Which season is the best to travel: summer, autumn, winter or spring ? Please choose only one,",
@@ -116,7 +121,7 @@ public class EmmaBrain {
                 }
                 if (has(input, "no", "nope", "not really")) {
                     state = State.END;
-                    return rand("Too bad. I won't be help for you then."
+                    return rand("Too bad. I won't be any help for you then."
                             + " But I would be happy if you contact me again if you plan to travel. See ya",
                             "I cannot help you then. I hope we will chat again soon. Byebye",
                             "Oh, but traveling is so much fun! :( byeee",
@@ -135,11 +140,11 @@ public class EmmaBrain {
                 }
             }
 
-            case USER_HAS_CITY:
-                return "|PH|";
-
+            /*
+             * user already has a city or needs help finding one
+             */
             case USER_WANTS_TRAVEL: {
-                city = KnowledgeBase.getCity(input);
+                city = KnowledgeBase.confirmCity(input);
                 if (city != null) {
                     state = State.USER_HAS_CITY;
                     return "Do you have any questions about " + city + " ?";
@@ -163,7 +168,19 @@ public class EmmaBrain {
                 }
             }
 
-            case CHOOSE_SEASON:
+            /*
+             * user has a travel destination, offer info about it 
+             */
+            case USER_HAS_CITY: {
+                /* cache wiki travel article on city */
+                cityWiki = KnowledgeBase.getWikiOn(city);
+                return "|PH|";
+            }
+
+            /*
+             * ask user for season 
+             */
+            case CHOOSE_SEASON: {
                 season = KnowledgeBase.getSeason(input);
                 if (season != null) {
                     state = State.CHOOSE_TEMPR;
@@ -174,8 +191,12 @@ public class EmmaBrain {
                 }
                 return "I am pretty sure that this is not the answer to my question or maybe you missspelled"
                         + " something  ... Please answer it again: summer, autumn, spring or winter ?";
+            }
 
-            case CHOOSE_TEMPR:
+            /*
+             * ask user for mean (daily?) temperature
+             */
+            case CHOOSE_TEMPR: {
                 tempr = KnowledgeBase.getTemperature(input);
                 if (tempr != null) {
                     state = State.CHOOSE_SIZE;
@@ -188,8 +209,12 @@ public class EmmaBrain {
                 }
                 return "Interesting, but please answer my question ... "
                         + "I need to know the answer.. Should it be hot in  " + season + " ?";
+            }
 
-            case CHOOSE_SIZE:
+            /*
+             * ask user for city size
+             */
+            case CHOOSE_SIZE: {
                 size = KnowledgeBase.getCitySize(input);
                 if (size != null) {
                     state = State.CHOOSE_CONTINENT;
@@ -201,8 +226,12 @@ public class EmmaBrain {
                 }
                 return "Huh, what ? Sorry but I need to find a city for you first "
                         + "... so answer my question please: do you wanna go to a big city ? ";
+            }
 
-            case CHOOSE_CONTINENT:
+            /*
+             * ask user for continent
+             */
+            case CHOOSE_CONTINENT: {
                 continent = KnowledgeBase.getContinent(input);
                 if (continent != null) {
 
@@ -211,7 +240,11 @@ public class EmmaBrain {
                 }
                 return "Hmmmmm .... I am not sure if that is the answer to my question ... my question was: "
                         + "Do you wanna stay in Europe, America, Asia, Australia or Africa ?";
+            }
 
+            /*
+             * should never happen
+             */
             default:
                 return "I'm confused, call a doctor.";
         }
