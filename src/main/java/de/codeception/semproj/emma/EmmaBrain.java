@@ -45,6 +45,8 @@ public class EmmaBrain {
         CHOOSE_SEASON,
         CHOOSE_ORIGIN,
         CHOOSE_CONTINENT,
+	/* city questionaire */
+	QUESTION_CITY
     };
 
     /* Emmas brain state */
@@ -99,7 +101,7 @@ public class EmmaBrain {
              */
             case ASK_IF_TRAVEL_WAIT_FOR_ANSWER: {
                 if (has(input, "yes", "yep", "yo", "yeah", "of course", "sure")) {
-                    state = State.USER_WANTS_TRAVEL;
+                    state = State.USER_HAS_CITY;
                     return rand(
                             "So where are you going ?",
                             "Great! Which city do you want to visit ? ",
@@ -143,10 +145,10 @@ public class EmmaBrain {
             /*
              * user already has a city or needs help finding one
              */
-            case USER_WANTS_TRAVEL: {
+            case USER_HAS_CITY: {
                 city = KnowledgeBase.confirmCity(input);
                 if (city != null) {
-                    state = State.USER_HAS_CITY;
+                    state = State.QUESTION_CITY;
                     return "Do you have any questions about " + city.replaceAll("_"," ") + " ?";
                 }
                 if (has(input, "don't know", "dunno", "do not know", "have not decide", "dont know")) {
@@ -171,10 +173,28 @@ public class EmmaBrain {
             /*
              * user has a travel destination, offer info about it 
              */
-            case USER_HAS_CITY: {
+            case QUESTION_CITY: {
                 /* cache wiki travel article on city */
                 cityWiki = KnowledgeBase.getWikiOn(city);
-                return "|PH|";
+		if(has(input, "eat", "food", "dish", "dishes")) {
+
+		}
+		if(has(input, "history", "story")) {
+
+		}
+		if(has(input, "climate", "weather")) {
+
+		}
+		if(has(input, "culture", "cultural")) {
+
+		}
+		if(has(input, "done", "bye", "cya", "thanks", "thank you")) {
+			state = State.END;
+			if(city!=null) return "Have fun in "+city+". Bye.";
+			return "Come back anytime.";
+		} else {
+			return "Hm ... I don't know anything about that. Sorry.";
+		}
             }
 
             /*

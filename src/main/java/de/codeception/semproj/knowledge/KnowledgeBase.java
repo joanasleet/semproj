@@ -71,8 +71,12 @@ public class KnowledgeBase {
 	if(jsobj==null) return null;
 
 	JSONObject pages = jsobj.getJSONObject("query").getJSONObject("pages");
-	String txt = pages.getJSONObject(pages.names().getString(0)).getJSONArray("revisions").getJSONObject(0).getString("*").toString().substring(0,100); System.out.println(txt);
+	String wiki = pages.getJSONObject(pages.names().getString(0)).getJSONArray("revisions").getJSONObject(0).getString("*").toString();
+	
+        wiki = wiki.replaceAll("\\\\n", "\n");
+        wiki = wiki.replaceAll("\\[\\[[^\\]]+\\]\\]", "");
 
+	System.out.println(wiki);
         return jsobj.toString();
     }
 
