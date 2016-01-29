@@ -38,9 +38,8 @@ public class KnowledgeBase {
 
     public static String confirmCity(String input) {
 
-        input = Util.capitalize(input);
+        input = Util.sanitize(input);
 
-        // TODO: sanitize bad input: "I want to travel to London"
         JsonNode node = askDBpedia(isCityQuery(input));
         if (node == null) {
             return null;
@@ -65,7 +64,16 @@ public class KnowledgeBase {
 
         JsonNode jsnode = getWiki(city);
 
-        return null;
+	if(jsnode==null) return null;
+
+	JSONObject jsobj = jsnode.getObject();
+
+	if(jsobj==null) return null;
+
+	JSONObject pages = jsobj.getJSONObject("query").getJSONObject("pages");
+	String txt = pages.getJSONObject(pages.names().getString(0)).getJSONArray("revisions").getJSONObject(0).getString("*").toString().substring(0,100); System.out.println(txt);
+
+        return jsobj.toString();
     }
 
     public static String getSeason(String input) {

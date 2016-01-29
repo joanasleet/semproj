@@ -65,6 +65,11 @@ public class Util {
 
     public static String sanitize(String s) {
 
-        return null;
+	    String[] sarr = s.trim().split(" ");
+	    String san = capitalize(sarr[0]);
+	    for( int i=1;i<sarr.length;i++ ) {
+		    san += "_"+capitalize(sarr[i]);
+	    }
+	    return san;
     }
 }

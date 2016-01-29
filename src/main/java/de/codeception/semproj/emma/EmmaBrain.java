@@ -147,7 +147,7 @@ public class EmmaBrain {
                 city = KnowledgeBase.confirmCity(input);
                 if (city != null) {
                     state = State.USER_HAS_CITY;
-                    return "Do you have any questions about " + city + " ?";
+                    return "Do you have any questions about " + city.replaceAll("_"," ") + " ?";
                 }
                 if (has(input, "don't know", "dunno", "do not know", "have not decide", "dont know")) {
                     state = State.CHOOSE_SEASON;
