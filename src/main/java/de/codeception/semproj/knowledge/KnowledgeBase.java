@@ -23,6 +23,9 @@ import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import static de.codeception.semproj.knowledge.Test.getAllInfo;
+import java.util.NoSuchElementException;
+import java.util.Scanner;
 
 public class KnowledgeBase {
 
@@ -32,7 +35,6 @@ public class KnowledgeBase {
 
     // TODO: underscore multi word inputs
     private static String isCityQuery(String city) {
-
         return String.format(DBP_ISCITY, city);
     }
 
@@ -64,20 +66,57 @@ public class KnowledgeBase {
 
         JsonNode jsnode = getWiki(city);
 
-	if(jsnode==null) return null;
+        if (jsnode == null) {
+            return null;
+        }
 
-	JSONObject jsobj = jsnode.getObject();
+        JSONObject jsobj = jsnode.getObject();
 
-	if(jsobj==null) return null;
+        if (jsobj == null) {
+            return null;
+        }
 
-	JSONObject pages = jsobj.getJSONObject("query").getJSONObject("pages");
-	String wiki = pages.getJSONObject(pages.names().getString(0)).getJSONArray("revisions").getJSONObject(0).getString("*").toString();
-	
-        wiki = wiki.replaceAll("\\\\n", "\n");
-        wiki = wiki.replaceAll("\\[\\[[^\\]]+\\]\\]", "");
+        JSONObject pages = jsobj.getJSONObject("query").getJSONObject("pages");
+        String wiki = pages.getJSONObject(pages.names().getString(0))
+                .getJSONArray("revisions").getJSONObject(0).getString("*");
 
-	System.out.println(wiki);
-        return jsobj.toString();
+        return wiki.replaceAll("\\\\n", "\n")
+                .replaceAll("\\[{2}\\w+:[^\\]]+\\]{2}", "") // strip file link
+                .replaceAll("\\{{2}[^\\}]+\\}{2}", "") // strip ref link
+                .replaceAll("\\{[^\\}]+\\}", "") // strip templates
+
+                .replaceAll("\\[{2}", "") // strip link
+                .replaceAll("\\]{2}", "") // strip link
+
+                .replaceAll("\\[[^ ]+ ", "") // strip file link
+                .replaceAll("\\]", "") // strip file link
+
+                .replaceAll("''''", "\"") // text formatig
+                .replaceAll("'''", "\"") // text formatig
+                .replaceAll("''", "\"") // text formatig
+
+                .replaceAll("[*][ ]?", "")
+                .replaceAll("\n{3,}", "\n");
+    }
+
+    private static final int MAX_WIKI_LENGTH = 400;
+    private static final String WIKI_SECTION_HEAD = "=+[ ]+(%s)[ ]+=+"; // matches wiki section head
+    private static final String WIKI_SECTION = "(%s)(={1,})(\\s+)[^=]"; // matches wiki section (with head)
+
+    public static String getWikiSection(String wiki, String section) {
+
+        try (Scanner scan = new Scanner(wiki)) {
+            String info = scan.next(String.format(WIKI_SECTION, section));
+            System.out.println(info);
+            info = info.replaceAll(String.format(WIKI_SECTION_HEAD, section), "");
+            System.out.println(info);
+            info = info.substring(0, Math.max(MAX_WIKI_LENGTH, info.length() - 1)).trim();
+            System.out.println(info);
+            return (info.isEmpty() ? null : info);
+        } catch (NoSuchElementException ex) {
+            System.out.println("WARN: No " + section + " section in wiki");
+        }
+        return null;
     }
 
     public static String getSeason(String input) {
@@ -119,7 +158,6 @@ public class KnowledgeBase {
 
         try {
             HttpResponse<JsonNode> request = Unirest.get(WIKI_VOYAGE_EN)
-                    .queryString("rvlimit", "1")
                     .queryString("titles", title)
                     .queryString("format", "json")
                     .queryString("action", "query")

@@ -45,8 +45,8 @@ public class EmmaBrain {
         CHOOSE_SEASON,
         CHOOSE_ORIGIN,
         CHOOSE_CONTINENT,
-	/* city questionaire */
-	QUESTION_CITY
+        /* city questionaire */
+        QUESTION_CITY
     };
 
     /* Emmas brain state */
@@ -66,6 +66,9 @@ public class EmmaBrain {
 
     /* wiki article of city */
     private String cityWiki;
+
+    /* emmas response when data missing */
+    private static final String DONT_KNOW = "Hm ... I don't know anything about that. Sorry.";
 
     public EmmaBrain() {
         state = State.INIT;
@@ -149,7 +152,7 @@ public class EmmaBrain {
                 city = KnowledgeBase.confirmCity(input);
                 if (city != null) {
                     state = State.QUESTION_CITY;
-                    return "Do you have any questions about " + city.replaceAll("_"," ") + " ?";
+                    return "Do you have any questions about " + city.replaceAll("_", " ") + " ?";
                 }
                 if (has(input, "don't know", "dunno", "do not know", "have not decide", "dont know")) {
                     state = State.CHOOSE_SEASON;
@@ -176,25 +179,30 @@ public class EmmaBrain {
             case QUESTION_CITY: {
                 /* cache wiki travel article on city */
                 cityWiki = KnowledgeBase.getWikiOn(city);
-		if(has(input, "eat", "food", "dish", "dishes")) {
+                if (has(input, "eat", "food", "dish", "dishes")) {
+                    String resp = KnowledgeBase.getWikiSection(cityWiki, "Eat");
+                    return (resp != null) ? resp : DONT_KNOW;
+                }
+                if (has(input, "history", "story")) {
+                    String resp = KnowledgeBase.getWikiSection(cityWiki, "History");
+                    return (resp != null) ? resp : DONT_KNOW;
+                }
+                if (has(input, "climate", "weather")) {
+                    String resp = KnowledgeBase.getWikiSection(cityWiki, "Climate");
+                    return (resp != null) ? resp : DONT_KNOW;
+                }
+                if (has(input, "culture", "cultural")) {
 
-		}
-		if(has(input, "history", "story")) {
-
-		}
-		if(has(input, "climate", "weather")) {
-
-		}
-		if(has(input, "culture", "cultural")) {
-
-		}
-		if(has(input, "done", "bye", "cya", "thanks", "thank you")) {
-			state = State.END;
-			if(city!=null) return "Have fun in "+city+". Bye.";
-			return "Come back anytime.";
-		} else {
-			return "Hm ... I don't know anything about that. Sorry.";
-		}
+                }
+                if (has(input, "done", "bye", "cya", "thanks", "thank you")) {
+                    state = State.END;
+                    if (city != null) {
+                        return "Have fun in " + city + ". Bye.";
+                    }
+                    return "Come back anytime.";
+                } else {
+                    return DONT_KNOW;
+                }
             }
 
             /*
