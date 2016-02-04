@@ -1,3 +1,5 @@
 target/
+chats/*
+!chats/dummy
 *.class
 **/*.class

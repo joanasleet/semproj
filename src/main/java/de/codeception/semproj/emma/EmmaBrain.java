@@ -69,7 +69,7 @@ public class EmmaBrain {
     private String cityWiki;
 
     /* emmas response when data missing */
-    private static final String DONT_KNOW = "Hm ... I don't know anything about that. Sorry.";
+    private static final String DONT_KNOW = "Hm ... I don't know anything about that. Sorry";
     private static final String ANOTHER_Q = " ... Do you have another question ?";
     private static final String WHATEVER = "Then you might as well choose ...";
 
@@ -177,19 +177,23 @@ public class EmmaBrain {
                 cityWiki = KnowledgeBase.getWikiOn(city);
                 if (has(input, "eat", "food", "dish", "dishes", "cuisine")) {
                     String resp = KnowledgeBase.getWikiSection(cityWiki, "Eat");
-                    return (resp != null) ? resp : DONT_KNOW + ANOTHER_Q;
+                    resp = (resp != null) ? resp : DONT_KNOW;
+                    return resp + ANOTHER_Q;
                 }
                 if (has(input, "history", "story")) {
                     String resp = KnowledgeBase.getWikiSection(cityWiki, "History");
-                    return (resp != null) ? resp : DONT_KNOW + ANOTHER_Q;
+                    resp = (resp != null) ? resp : DONT_KNOW;
+                    return resp + ANOTHER_Q;
                 }
                 if (has(input, "climate", "weather")) {
                     String resp = KnowledgeBase.getWikiSection(cityWiki, "Climate");
-                    return (resp != null) ? resp : DONT_KNOW + ANOTHER_Q;
+                    resp = (resp != null) ? resp : DONT_KNOW;
+                    return resp + ANOTHER_Q;
                 }
                 if (has(input, "general", "generally")) {
                     String resp = KnowledgeBase.getWikiSection(cityWiki, null);
-                    return (resp != null) ? resp : DONT_KNOW + ANOTHER_Q;
+                    resp = (resp != null) ? resp : DONT_KNOW;
+                    return resp + ANOTHER_Q;
                 }
                 if (has(input, "yes", "yep", "yo", "yeah", "of course", "sure")) {
                     return "Ask away!";

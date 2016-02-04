@@ -18,16 +18,42 @@
  */
 package de.codeception.semproj.emma;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
+import java.util.List;
+
 public class Emma {
 
+    private File chatLog = null;
     private final EmmaBrain brain;
 
     public Emma() {
         brain = new EmmaBrain();
+
+        try {
+            chatLog = File.createTempFile("emma", ".txt", new File("chats"));
+        } catch (IOException ex) {
+            System.out.println("Failed to create chat log" + ex);
+        }
     }
 
     public String address(String query) {
-        return brain.process(query.trim());
-    }
 
+        String emmaResponse = brain.process(query.trim());
+
+        if (chatLog != null) {
+
+            List<String> conv = Arrays.asList(query, emmaResponse);
+            try {
+                Files.write(chatLog.toPath(), conv, Charset.forName("UTF-8"), StandardOpenOption.APPEND);
+            } catch (IOException ex) {
+                System.out.println("Failed to write chat log" + ex);
+            }
+        }
+        return emmaResponse;
+    }
 }
