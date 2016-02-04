@@ -54,9 +54,6 @@ public class EmmaBrain {
     /* Emmas brain state */
     private State state;
 
-    /* users name */
-    private String username;
-
     /* destination */
     private String city;
 
@@ -84,18 +81,9 @@ public class EmmaBrain {
                 state = State.ASK_IF_TRAVEL;
                 return "Hi, I'm Emma. I can help you find a travel destination.";
 
-            /* TODO: maybe */
-            case USER_NAME:
-                username = matchNot(input, "(Hi|,|I'm|I|am|my|name|is)");
-                state = State.ASK_IF_TRAVEL;
-                return process(null);
-
             /* disable user input in ui */
             case ASK_IF_TRAVEL:
                 state = State.ASK_IF_TRAVEL_WAIT_FOR_ANSWER;
-                if (username != null) {
-                    return username + ", do you wanna go on a journey in the near future ?";
-                }
                 return "Do you wanna go on a journey in the near future ?";
 
             case ASK_IF_TRAVEL_WAIT_FOR_ANSWER: {
@@ -109,7 +97,7 @@ public class EmmaBrain {
                 }
                 if (has(input, "don't know", "dunno", "do not know", "maybe",
                         "have not decide", "not sure", "dont know")) {
-                    state = State.USER_WANTS_TRAVEL; // ?? user doesnt know IF he wants to travel
+                    state = State.USER_WANTS_TRAVEL;
                     return rand(
                             "I can help you to choose a city and make a decision then. "
                             + "Which season is the best to travel ?",
@@ -211,13 +199,13 @@ public class EmmaBrain {
             case CHOOSE_CONTINENT:
                 continent = KnowledgeBase.getContinent(input);
                 if (continent != null) {
-					state = State.CHOOSE_RAIN;
-					return rand("I have been to " + continent + " several times. It's such a beautiful continent!"
-					            + "Anyway.. Do you wanna go to a city where it often rains ?",
-					            "Ok ... " + continent + " has alot of beautiful countries."
-					            + "I will find the perfect one for you. Should the city have a lot of rainy days in " + season + " ?",
-					            "Yay! " + continent + " is my fav too. We have so much in common! :D" 
-					            + "Do you like rainy weather as much as me ?");
+                    state = State.CHOOSE_RAIN;
+                    return rand("I have been to " + continent + " several times. It's such a beautiful continent!"
+                            + "Anyway.. Do you wanna go to a city where it often rains ?",
+                            "Ok ... " + continent + " has alot of beautiful countries."
+                            + "I will find the perfect one for you. Should the city have a lot of rainy days in " + season + " ?",
+                            "Yay! " + continent + " is my fav too. We have so much in common! :D"
+                            + "Do you like rainy weather as much as me ?");
 
                 } else {
                     // TODO: dont care
@@ -225,78 +213,70 @@ public class EmmaBrain {
                 return "Hmmmmm .... I am not sure if that is the answer to my question ... my question was: "
                         + "Do you wanna stay in Europe, America, Asia, Australia or Africa ?";
 
-                
-             case CHOOSE_RAIN:
-                if (has(input, "yes", "yep", "yo", "yeah", "of course", "sure")){
-					rain = "rainy";
-					state = State.CHOOSE_SUN;
-					return rand("I knew it. We are indeed soulmates! I love rainy weather!!"
-				                + "Next question: Do you wanna have alot of sunny days as well ?",
-					             "I see ... how about sunny days ? Should there be alot of them in " + season + " ?",
-					             "Good decision! But you probably want alot of sunny days too, don't you ?");
+            case CHOOSE_RAIN:
+                if (has(input, "yes", "yep", "yo", "yeah", "of course", "sure")) {
+                    rain = "rainy";
+                    state = State.CHOOSE_SUN;
+                    return rand("I knew it. We are indeed soulmates! I love rainy weather!!"
+                            + "Next question: Do you wanna have alot of sunny days as well ?",
+                            "I see ... how about sunny days ? Should there be alot of them in " + season + " ?",
+                            "Good decision! But you probably want alot of sunny days too, don't you ?");
 
-                } 
-                
-                if(has(input, "no", "nope", "not really")){
-					rain = "notrainy";
-					state = State.CHOOSE_SUN;
-					return rand("Oh ok ... I like rainy days."
-					            + "So I assume you want to have many days of sunshine while traveling to " + continent + " ?",
-					             "Two question are still yet to come: If you don't like rainy days, you probably love sunny days, right ?",
-					             "How about sunny days ? Should there be alot of them ?");
-					
-				}
-                 else {
+                }
+
+                if (has(input, "no", "nope", "not really")) {
+                    rain = "notrainy";
+                    state = State.CHOOSE_SUN;
+                    return rand("Oh ok ... I like rainy days."
+                            + "So I assume you want to have many days of sunshine while traveling to " + continent + " ?",
+                            "Two question are still yet to come: If you don't like rainy days, you probably love sunny days, right ?",
+                            "How about sunny days ? Should there be alot of them ?");
+
+                } else {
                     // TODO: dont care
                 }
                 return "Interesting, but obviously not the answer to my very important question:"
-                       + "Do you like rainy days ?";
+                        + "Do you like rainy days ?";
 
+            case CHOOSE_SUN:
+                if (has(input, "yes", "yep", "yo", "yeah", "of course", "sure")) {
+                    sun = "sunny";
+                    state = State.CHOOSE_AIRPORT;
+                    return rand("Great! I am always in a good mood when the sun is shining"
+                            + "Final question: Is an airport important to you ?",
+                            "Perfect. Should the city be reachable by plane ?");
 
-             case CHOOSE_SUN:
-                if (has(input, "yes", "yep", "yo", "yeah", "of course", "sure")){
-					sun = "sunny";
-					state = State.CHOOSE_AIRPORT;
-					return rand("Great! I am always in a good mood when the sun is shining"
-				                 + "Final question: Is an airport important to you ?",
-				                 "Perfect. Should the city be reachable by plane ?");
+                }
 
-                } 
-                
-                if(has(input, "no", "nope", "not really")){
-					rain = "notsunny";
-					state = State.CHOOSE_AIRPORT;
-					return rand("Last question for now: Should there be an airport in or nearby the city ?",
-					            "Should the city be served ?");
-					
-				}
-                 else {
+                if (has(input, "no", "nope", "not really")) {
+                    rain = "notsunny";
+                    state = State.CHOOSE_AIRPORT;
+                    return rand("Last question for now: Should there be an airport in or nearby the city ?",
+                            "Should the city be served ?");
+
+                } else {
                     // TODO: dont care
                 }
                 return "Please answer my question first!"
                         + "Should there be alot of sunny days ?";
-                        
-                        
-              case CHOOSE_AIRPORT:
-                if (has(input, "yes", "yep", "yo", "yeah", "of course", "sure")){
-					airport = "airport";
-					
 
-                } 
-                
-                if(has(input, "no", "nope", "not really")){
-					airport = "noairport";
-					
-				}
-				
-                 else {
+            case CHOOSE_AIRPORT:
+                if (has(input, "yes", "yep", "yo", "yeah", "of course", "sure")) {
+                    airport = "airport";
+
+                }
+
+                if (has(input, "no", "nope", "not really")) {
+                    airport = "noairport";
+
+                } else {
                     // TODO: dont care
                 }
-                return "............. I'll ask again: Should there be an airport ?" ;
-                        
+                return "............. I'll ask again: Should there be an airport ?";
+
             default:
                 return "I'm confused, call a doctor.";
-       }  
+        }
     }
 }
 
