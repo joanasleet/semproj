@@ -363,6 +363,13 @@ public class EmmaBrain {
             }
 
             /*
+            *  end 
+             */
+            case END: {
+                return "That's pretty much it! See you next time.";
+            }
+
+            /*
              * should never happen
              */
             default:
