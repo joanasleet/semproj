@@ -22,32 +22,40 @@ import de.codeception.semproj.emma.Emma;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.UUID;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 public class EmmaServlet extends HttpServlet {
 
     private static final String HTTP_INPUT_PARAM = "input";
-    private static final String EMMA_INSTANCE_PARAM = "emma";
+    private static final String HTTP_SESSION_ID = "sessionID";
+
+    private static final HashMap<String, Emma> Emmas = new HashMap<String, Emma>(1);
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        HttpSession sess = request.getSession();
-        Object emmaObj = sess.getAttribute(EMMA_INSTANCE_PARAM);
-
-        /* get emma instance */
-        Emma emma;
-        if (emmaObj == null) {
-            emma = new Emma();
-            sess.setAttribute(EMMA_INSTANCE_PARAM, emma);
-        } else {
-            emma = (Emma) emmaObj;
+        /* get session or create one */
+        String sessionID = request.getParameter(HTTP_SESSION_ID);
+        if (sessionID == null) {
+            return;
         }
+
+        sessionID = sessionID.trim();
+        if (sessionID.isEmpty() || !Emmas.containsKey(sessionID)) {
+            sessionID = UUID.randomUUID().toString();
+            Emmas.put(sessionID, new Emma());
+            respond(response, sessionID);
+            return;
+        }
+
+        /* get emma instance by session id */
+        Emma emma = Emmas.get(sessionID);
 
         /* get input parameter value */
         String input = request.getParameter(HTTP_INPUT_PARAM);
@@ -57,11 +65,15 @@ public class EmmaServlet extends HttpServlet {
 
         /* get emmas response */
         String emmaResponse = emma.address(input);
+        respond(response, emmaResponse);
+    }
 
-        /* write response */
+    /* write response */
+    private void respond(HttpServletResponse response, String msg)
+            throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
-            out.println(emmaResponse);
+            out.println(msg);
         }
     }
 

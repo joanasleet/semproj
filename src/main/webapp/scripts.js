@@ -1,20 +1,26 @@
 $(document).ready(function () {
 
+    var sessID = "";
+
     var service = "emma";
 
     var loader = $("#emmaTyping");
     var emmaText = $("#emmaText");
     var userInput = $("#userText>input");
 
-    var requestDelay = 300;
+    var requestDelay = 0;
 
-    /* start conversation */
-    emmaText.load(service, {input: ""}).fadeIn(2000).fadeOut(500, function () {
-        emmaText.load(service, {input: "proceed"}).fadeIn(2000, function () {
-            userInput.prop("disabled", false).focus();
+    /* get session id */
+    $.get(service, {sessionID: ""}, function (data) {
+        sessID = data;
+
+        /* start conversation */
+        emmaText.load(service, {input: "", sessionID: sessID}).fadeIn(2000).fadeOut(500, function () {
+            emmaText.load(service, {input: "proceed", sessionID: sessID}).fadeIn(2000, function () {
+                userInput.prop("disabled", false).focus();
+            });
         });
     });
-
 
     /* user text submit */
     userInput.bind("enterKey", function () {
@@ -32,7 +38,7 @@ $(document).ready(function () {
                 /* do request and present result */
                 var inputVal = userInput.val();
                 userInput.val("");
-                emmaText.load(service, {input: inputVal}, function () {
+                emmaText.load(service, {input: inputVal, sessionID: sessID}, function () {
                     loader.fadeOut(requestDelay, function () {
                         emmaText.fadeIn(requestDelay);
                         userInput.prop("disabled", false);

@@ -21,7 +21,6 @@ package de.codeception.semproj.emma;
 import de.codeception.semproj.knowledge.KnowledgeBase;
 import static de.codeception.semproj.knowledge.Util.has;
 import static de.codeception.semproj.knowledge.Util.rand;
-import static de.codeception.semproj.knowledge.Util.matchNot;
 
 public class EmmaBrain {
 
@@ -30,7 +29,6 @@ public class EmmaBrain {
         /* context info */
         INIT,
         GREET,
-        USER_NAME,
         USER_HAS_CITY,
         USER_NO_TRAVEL,
         END,
@@ -40,15 +38,16 @@ public class EmmaBrain {
         ASK_IF_TRAVEL_STAY_ON_TOPIC,
         USER_WANTS_TRAVEL,
         /* destination criteria */
-        CHOOSE_CITY,
-        CHOOSE_SIZE,
-        CHOOSE_TEMPR,
-        CHOOSE_SEASON,
-        CHOOSE_ORIGIN,
         CHOOSE_CONTINENT,
+        CHOOSE_SIZE,
+        CHOOSE_AIRPORT,
+        CHOOSE_SEASON,
+        CHOOSE_TEMPR,
         CHOOSE_RAIN,
         CHOOSE_SUN,
-        CHOOSE_AIRPORT,
+        CHOOSE_CITY,
+        /* city questionaire */
+        QUESTION_CITY
     };
 
     /* Emmas brain state */
@@ -58,13 +57,21 @@ public class EmmaBrain {
     private String city;
 
     /* destination criteria */
-    private String size;
-    private String tempr;
-    private String season;
     private String continent;
-    private String rain;
-    private String sun;
-    private String airport;
+    private String size;
+    private boolean airport;
+    private String season;
+    private String tempr;
+    private boolean rainy;
+    private boolean sunny;
+
+    /* wiki article of city */
+    private String cityWiki;
+
+    /* emmas response when data missing */
+    private static final String DONT_KNOW = "Hm ... I don't know anything about that. Sorry.";
+    private static final String ANOTHER_Q = " ... Do you have another question ?";
+    private static final String WHATEVER = "Then you might as well choose ...";
 
     public EmmaBrain() {
         state = State.INIT;
@@ -76,21 +83,27 @@ public class EmmaBrain {
 
         switch (state) {
 
-            /* greet, what does the bot do */
-            case INIT:
+            /*
+             * greet user, explain bots function
+             */
+            case INIT: {
                 state = State.ASK_IF_TRAVEL;
                 return "Hi, I'm Emma. I can help you find a travel destination.";
+            }
 
             /* disable user input in ui */
-            case ASK_IF_TRAVEL:
+            case ASK_IF_TRAVEL: {
                 state = State.ASK_IF_TRAVEL_WAIT_FOR_ANSWER;
                 return "Do you wanna go on a journey in the near future ?";
+            }
 
+            /*
+             * get answer for above 
+             */
             case ASK_IF_TRAVEL_WAIT_FOR_ANSWER: {
                 if (has(input, "yes", "yep", "yo", "yeah", "of course", "sure")) {
-                    state = State.USER_WANTS_TRAVEL;
-                    return rand(
-                            "So where are you going ?",
+                    state = State.USER_HAS_CITY;
+                    return rand("So where are you going ?",
                             "Great! Which city do you want to visit ? ",
                             "Yay! I love to travel. What is your destination ?",
                             "That's awesome. Tell me the name of the city you have chosen.");
@@ -98,8 +111,7 @@ public class EmmaBrain {
                 if (has(input, "don't know", "dunno", "do not know", "maybe",
                         "have not decide", "not sure", "dont know")) {
                     state = State.USER_WANTS_TRAVEL;
-                    return rand(
-                            "I can help you to choose a city and make a decision then. "
+                    return rand("I can help you to choose a city and make a decision then. "
                             + "Which season is the best to travel ?",
                             "No Problem. I will ask you some question to help you with your decision."
                             + " Would you like to travel in summer, autumn, winter or spring ?",
@@ -110,7 +122,7 @@ public class EmmaBrain {
                 }
                 if (has(input, "no", "nope", "not really")) {
                     state = State.END;
-                    return rand("Too bad. I won't be help for you then."
+                    return rand("Too bad. I won't be any help for you then."
                             + " But I would be happy if you contact me again if you plan to travel. See ya",
                             "I cannot help you then. I hope we will chat again soon. Byebye",
                             "Oh, but traveling is so much fun! :( byeee",
@@ -129,14 +141,14 @@ public class EmmaBrain {
                 }
             }
 
-            case USER_HAS_CITY:
-                return "|PH|";
-
-            case USER_WANTS_TRAVEL: {
-                city = KnowledgeBase.getCity(input);
+            /*
+             * user already has a city or needs help finding one
+             */
+            case USER_HAS_CITY: {
+                city = KnowledgeBase.confirmCity(input);
                 if (city != null) {
-                    state = State.USER_HAS_CITY;
-                    return "Do you have any questions about " + city + " ?";
+                    state = State.QUESTION_CITY;
+                    return "Do you have any questions about " + city.replaceAll("_", " ") + " ?";
                 }
                 if (has(input, "don't know", "dunno", "do not know", "have not decide", "dont know")) {
                     state = State.CHOOSE_SEASON;
@@ -157,65 +169,148 @@ public class EmmaBrain {
                 }
             }
 
-            case CHOOSE_SEASON:
-                season = KnowledgeBase.getSeason(input);
-                if (season != null) {
-                    state = State.CHOOSE_TEMPR;
-                    return rand("Should the weather be warm, mild or cold while you are staying there ?",
-                            "Good choice. Do you want a city where the temperatures are mild in " + season + " ? Or maybe you prefer warm or even cold weather ?",
-                            "Ok ... next question: Should I search for a city where it's warm in " + season + " ? Or do you prefer cold weather ? Or maybe mild ? ... ",
-                            "Yay! " + season + " is my fav season ... now I need to know what kind of weather you prefer. Warm, mild or maybe cold weather ?");
+            /*
+             * user has a travel destination, offer info about it 
+             */
+            case QUESTION_CITY: {
+                /* cache wiki travel article on city */
+                cityWiki = KnowledgeBase.getWikiOn(city);
+                if (has(input, "eat", "food", "dish", "dishes", "cuisine")) {
+                    String resp = KnowledgeBase.getWikiSection(cityWiki, "Eat");
+                    return (resp != null) ? resp : DONT_KNOW + ANOTHER_Q;
                 }
-                return "I am pretty sure that this is not the answer to my question or maybe you missspelled"
-                        + " something  ... Please answer it again: summer, autumn, spring or winter ?";
-
-            case CHOOSE_TEMPR:
-                tempr = KnowledgeBase.getTemperature(input);
-                if (tempr != null) {
-                    state = State.CHOOSE_SIZE;
-                    return rand("Ok, and should it be a big city or a small one?",
-                            "Great! Do you wanna go to a big city with alot of people living there or a small town ?",
-                            "Personally, I prefer cold weather cause I am sweating alot when it's hot"
-                            + " ... Nevermind .. do you prefer big, middle or small cities ?",
-                            "And how about the size of the city .. should it be a big crowded city or a small one     ?"
-                    );
+                if (has(input, "history", "story")) {
+                    String resp = KnowledgeBase.getWikiSection(cityWiki, "History");
+                    return (resp != null) ? resp : DONT_KNOW + ANOTHER_Q;
                 }
-                return "Interesting, but please answer my question ... "
-                        + "I need to know the answer.. How should be the weather in " + season + " ? Warm, mild or cold ?";
-
-            case CHOOSE_SIZE:
-                size = KnowledgeBase.getCitySize(input);
-                if (size != null) {
-                    state = State.CHOOSE_CONTINENT;
-                    return rand("Next question: Which continent should it be ?",
-                            "So do you wanna stay in a city located in Europe, America, Africa, Asia or Australia ?",
-                            "Ok ... Now choose a continent please..");
+                if (has(input, "climate", "weather")) {
+                    String resp = KnowledgeBase.getWikiSection(cityWiki, "Climate");
+                    return (resp != null) ? resp : DONT_KNOW + ANOTHER_Q;
+                }
+                if (has(input, "general", "generally")) {
+                    String resp = KnowledgeBase.getWikiSection(cityWiki, null);
+                    return (resp != null) ? resp : DONT_KNOW + ANOTHER_Q;
+                }
+                if (has(input, "yes", "yep", "yo", "yeah", "of course", "sure")) {
+                    return "Ask away!";
+                }
+                if (has(input, "done", "bye", "cya", "thanks", "thank you", "no", "nope", "not really")) {
+                    state = State.END;
+                    if (city != null) {
+                        return "Have fun in " + city + ". Bye.";
+                    }
+                    return "Come back anytime!";
                 } else {
-                    // TODO: dont care
+                    return DONT_KNOW + ANOTHER_Q;
                 }
-                return "Huh, what ? Sorry but I need to find a city for you first "
-                        + "... so answer my question please: do you wanna go to a big or small city ? ";
+            }
 
-            case CHOOSE_CONTINENT:
+            /*
+             * ask for continent
+             */
+            case CHOOSE_CONTINENT: {
                 continent = KnowledgeBase.getContinent(input);
                 if (continent != null) {
                     state = State.CHOOSE_RAIN;
                     return rand("I have been to " + continent + " several times. It's such a beautiful continent!"
-                            + "Anyway.. Do you wanna go to a city where it often rains ?",
+                            + "Anyway.. Do you wanna go to a city where it rains alot ?",
                             "Ok ... " + continent + " has alot of beautiful countries."
                             + "I will find the perfect one for you. Should the city have a lot of rainy days in " + season + " ?",
                             "Yay! " + continent + " is my fav too. We have so much in common! :D"
                             + "Do you like rainy weather as much as me ?");
-
-                } else {
-                    // TODO: dont care
+                }
+                if (has(input, "do not care", "don't care", "dont care", "doesn't matter", "does not matter", "no matter")) {
+                    return WHATEVER;
                 }
                 return "Hmmmmm .... I am not sure if that is the answer to my question ... my question was: "
                         + "Do you wanna stay in Europe, America, Asia, Australia or Africa ?";
+            }
 
-            case CHOOSE_RAIN:
+            /* 
+             * ask user for city size
+             */
+            case CHOOSE_SIZE: {
+                size = KnowledgeBase.getCitySize(input);
+                if (size != null) {
+                    state = State.CHOOSE_CONTINENT;
+                    return rand("Next question: Which continent should it be on ?",
+                            "So do you wanna stay in a city located in Europe, America, Africa, Asia or Australia ?",
+                            "Ok ... Now choose a continent please..");
+                }
+                if (has(input, "do not care", "don't care", "dont care", "doesn't matter", "does not matter", "no matter")) {
+                    return WHATEVER;
+                }
+                return rand("Huh, what ? Sorry but I need to find a city for you first "
+                        + "... so answer my question please: do you wanna go to a small, medium or big city ?",
+                        "... Please answer my question: do you wanna go to a small, medium or big city ?");
+            }
+
+
+            /*
+             * ask for ex. airport
+             */
+            case CHOOSE_AIRPORT: {
                 if (has(input, "yes", "yep", "yo", "yeah", "of course", "sure")) {
-                    rain = "rainy";
+                    airport = true;
+                }
+                if (has(input, "no", "nope", "not really")) {
+                    airport = true;
+                }
+                if (has(input, "do not care", "don't care", "dont care", "doesn't matter", "does not matter", "no matter")) {
+                    return WHATEVER;
+                }
+                return "... I'll ask again: Should there be an airport ?";
+            }
+
+
+            /*
+             * ask user for season 
+             */
+            case CHOOSE_SEASON: {
+                season = KnowledgeBase.getSeason(input);
+                if (season != null) {
+                    state = State.CHOOSE_TEMPR;
+                    return rand("Should the weather be warm, mild or cold while you are staying there ?",
+                            "Good choice. Do you want a city where the temperatures are mild in " + season
+                            + " ? Or maybe you prefer warm or even cold weather ?",
+                            "Ok ... next question: Should I search for a city where it's warm in " + season
+                            + " ? Or do you prefer cold weather ? Or maybe mild ? ... ",
+                            "Yay! " + season + " is my fav season ... now I need to know what kind of weather you prefer."
+                            + " Warm, mild or maybe cold weather ?");
+                }
+                if (has(input, "do not care", "don't care", "dont care", "doesn't matter", "does not matter", "no matter")) {
+                    return WHATEVER;
+                }
+                return "I am pretty sure that this is not the answer to my question or maybe you misspelled"
+                        + " something ... Please answer it again: summer, autumn, spring or winter ?";
+            }
+
+            /*
+             * ask for temperature
+             */
+            case CHOOSE_TEMPR: {
+                tempr = KnowledgeBase.getTemperature(input);
+                if (tempr != null) {
+                    state = State.CHOOSE_SIZE;
+                    return rand("Ok, and should it be a big, medium or a small city ?",
+                            "Personally, I prefer cold weather cause I am sweating alot when it's hot"
+                            + " ... Nevermind .. do you prefer big, medium or small cities ?",
+                            "And how about the size of the city .. should it be a big, crowded city or a small one ?");
+                }
+                if (has(input, "do not care", "don't care", "dont care", "doesn't matter", "does not matter", "no matter")) {
+                    return WHATEVER;
+                }
+                return rand("Interesting, but please answer my question ... "
+                        + "How should be the temperature in " + season + " ? Warm, mild or cold ?",
+                        "I need to know the answer ... Should it be warm, mild or cold in  " + season + " ?");
+            }
+
+            /*
+             * ask for niederschlag
+             */
+            case CHOOSE_RAIN: {
+                if (has(input, "yes", "yep", "yo", "yeah", "of course", "sure")) {
+                    rainy = true;
                     state = State.CHOOSE_SUN;
                     return rand("I knew it. We are indeed soulmates! I love rainy weather!!"
                             + "Next question: Do you wanna have alot of sunny days as well ?",
@@ -223,57 +318,49 @@ public class EmmaBrain {
                             "Good decision! But you probably want alot of sunny days too, don't you ?");
 
                 }
-
                 if (has(input, "no", "nope", "not really")) {
-                    rain = "notrainy";
+                    rainy = true;
                     state = State.CHOOSE_SUN;
                     return rand("Oh ok ... I like rainy days."
                             + "So I assume you want to have many days of sunshine while traveling to " + continent + " ?",
                             "Two question are still yet to come: If you don't like rainy days, you probably love sunny days, right ?",
                             "How about sunny days ? Should there be alot of them ?");
 
-                } else {
-                    // TODO: dont care
+                }
+                if (has(input, "do not care", "don't care", "dont care", "doesn't matter", "does not matter", "no matter")) {
+                    return WHATEVER;
                 }
                 return "Interesting, but obviously not the answer to my very important question:"
                         + "Do you like rainy days ?";
+            }
 
-            case CHOOSE_SUN:
+            /*
+             * ask for ex. airport
+             */
+            case CHOOSE_SUN: {
                 if (has(input, "yes", "yep", "yo", "yeah", "of course", "sure")) {
-                    sun = "sunny";
+                    sunny = true;
                     state = State.CHOOSE_AIRPORT;
                     return rand("Great! I am always in a good mood when the sun is shining"
                             + "Final question: Is an airport important to you ?",
                             "Perfect. Should the city be reachable by plane ?");
-
                 }
-
                 if (has(input, "no", "nope", "not really")) {
-                    rain = "notsunny";
+                    sunny = false;
                     state = State.CHOOSE_AIRPORT;
                     return rand("Last question for now: Should there be an airport in or nearby the city ?",
                             "Should the city be served ?");
-
-                } else {
-                    // TODO: dont care
+                }
+                if (has(input, "do not care", "don't care", "dont care", "doesn't matter", "does not matter", "no matter")) {
+                    return WHATEVER;
                 }
                 return "Please answer my question first!"
                         + "Should there be alot of sunny days ?";
+            }
 
-            case CHOOSE_AIRPORT:
-                if (has(input, "yes", "yep", "yo", "yeah", "of course", "sure")) {
-                    airport = "airport";
-
-                }
-
-                if (has(input, "no", "nope", "not really")) {
-                    airport = "noairport";
-
-                } else {
-                    // TODO: dont care
-                }
-                return "............. I'll ask again: Should there be an airport ?";
-
+            /*
+             * should never happen
+             */
             default:
                 return "I'm confused, call a doctor.";
         }
