@@ -25,6 +25,7 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
+import org.json.JSONArray;
 
 public class KnowledgeBase {
 
@@ -156,6 +157,111 @@ public class KnowledgeBase {
 
     public static String getTemperature(String input) {
         return Util.match(input, "(cold|mild|warm)");
+    }
+
+    public static String getCity(String cont, String size, String seas, String tempr, boolean airport, boolean rainy, boolean sunny) {
+
+        String mon;
+        switch (seas) {
+            case "summer":
+                mon = "jul";
+                break;
+            case "winter":
+                mon = "jan";
+                break;
+            case "spring":
+                mon = "apr";
+                break;
+            case "autumn":
+                mon = "sep";
+                break;
+            default:
+                mon = "jan";
+        }
+
+        String sz;
+        switch (size) {
+            case "small":
+                sz = "< 20000";
+                break;
+            case "medium":
+                sz = "> 20000 && ?inhabitants < 100000";
+                break;
+            case "big":
+                sz = "> 100000";
+                break;
+            default:
+                sz = "< 20000";
+        }
+
+        String t = "";
+        switch (tempr) {
+            case "cold":
+                t = "< 10";
+                break;
+            case "mild":
+                t = "> 10 && ?temp < 20";
+                break;
+            case "warm":
+                t = "> 20";
+                break;
+            default:
+                t = "> 10 && ?temp < 20";
+        }
+
+        String rain = (rainy ? "> 50" : "<= 50");
+        String sun = (sunny ? "> 250" : "<= 250");
+
+        String airp = (airport ? "?uri dbp:cityServed ?air .\n" : "");
+
+        String query
+                = "PREFIX dbo: <http://dbpedia.org/ontology/>\n"
+                + "PREFIX dbp: <http://dbpedia.org/property/>\n"
+                + "PREFIX res: <http://dbpedia.org/resource/>\n"
+                + "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
+                + "SELECT DISTINCT ?city\n"
+                + "WHERE {\n"
+                + "?uri rdf:type dbo:PopulatedPlace .\n"
+                + "?uri dbp:populationTotal ?inhabitants .\n"
+                + "?uri dbp:%sMeanC ?temp.\n"
+                + "?uri dbp:%sPrecipitationMm ?rain.\n"
+                + "?uri dbp:%sSun ?sun.\n"
+                + "%s"
+                + "?uri rdfs:label ?city .\n"
+                + "FILTER (?inhabitants %s ) .\n"
+                + "FILTER (?temp %s ) .\n"
+                + "FILTER (?rain %s ) .\n"
+                + "FILTER (?sun %s ) .\n"
+                + "FILTER (lang(?city) = 'en') .\n"
+                + "}\n"
+                + "ORDER BY DESC(?inhabitants)\n"
+                + "LIMIT 10\n";
+
+        query = String.format(query, mon, mon, mon, airp, sz, t, rain, sun);
+
+        JsonNode node = askDBpedia(query);
+
+        if (node == null) {
+            return null;
+        }
+
+        JSONObject jsobj = node.getObject();
+
+        if (jsobj == null) {
+            return null;
+        }
+
+        JSONObject results = jsobj.getJSONObject("results");
+        JSONArray cities = results.getJSONArray("bindings");
+
+        if (cities.length() == 0) {
+            return null;
+        }
+
+        JSONObject city0 = cities.getJSONObject(0).getJSONObject("city");
+        String city = city0.getString("value");
+
+        return city;
     }
 
     /*

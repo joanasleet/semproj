@@ -34,7 +34,7 @@ public class EmmaServlet extends HttpServlet {
     private static final String HTTP_INPUT_PARAM = "input";
     private static final String HTTP_SESSION_ID = "sessionID";
 
-    private static final HashMap<String, Emma> Emmas = new HashMap<String, Emma>(1);
+    private static final HashMap<String, Emma> EMMAS = new HashMap<>(1);
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -47,15 +47,15 @@ public class EmmaServlet extends HttpServlet {
         }
 
         sessionID = sessionID.trim();
-        if (sessionID.isEmpty() || !Emmas.containsKey(sessionID)) {
+        if (sessionID.isEmpty() || !EMMAS.containsKey(sessionID)) {
             sessionID = UUID.randomUUID().toString();
-            Emmas.put(sessionID, new Emma());
+            EMMAS.put(sessionID, new Emma());
             respond(response, sessionID);
             return;
         }
 
         /* get emma instance by session id */
-        Emma emma = Emmas.get(sessionID);
+        Emma emma = EMMAS.get(sessionID);
 
         /* get input parameter value */
         String input = request.getParameter(HTTP_INPUT_PARAM);

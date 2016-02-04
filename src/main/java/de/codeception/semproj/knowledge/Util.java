@@ -28,6 +28,7 @@ public class Util {
     }
 
     public static boolean has(String target, String... oneOfThese) {
+        target = target.toLowerCase();
         for (String s : oneOfThese) {
             if (target.contains(s)) {
                 return true;

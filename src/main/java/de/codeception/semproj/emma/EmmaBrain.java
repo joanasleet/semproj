@@ -47,6 +47,7 @@ public class EmmaBrain {
         CHOOSE_SUN,
         CHOOSE_CITY,
         /* city questionaire */
+        NO_CITY_MATCH,
         QUESTION_CITY
     };
 
@@ -55,6 +56,7 @@ public class EmmaBrain {
 
     /* destination */
     private String city;
+    private String cityList;
 
     /* destination criteria */
     private String continent;
@@ -110,7 +112,7 @@ public class EmmaBrain {
                 }
                 if (has(input, "don't know", "dunno", "do not know", "maybe",
                         "have not decide", "not sure", "dont know")) {
-                    state = State.USER_WANTS_TRAVEL;
+                    state = State.CHOOSE_SEASON;
                     return rand("I can help you to choose a city and make a decision then. "
                             + "Which season is the best to travel ?",
                             "No Problem. I will ask you some question to help you with your decision."
@@ -148,7 +150,8 @@ public class EmmaBrain {
                 city = KnowledgeBase.confirmCity(input);
                 if (city != null) {
                     state = State.QUESTION_CITY;
-                    return "Do you have any questions about " + city.replaceAll("_", " ") + " ?";
+                    return "Do you have any questions about " + city.replaceAll("_", " ") + " ? "
+                            + "Like cuisine, history, weather, safety or in general.";
                 }
                 if (has(input, "don't know", "dunno", "do not know", "have not decide", "dont know")) {
                     state = State.CHOOSE_SEASON;
@@ -187,6 +190,11 @@ public class EmmaBrain {
                 }
                 if (has(input, "climate", "weather")) {
                     String resp = KnowledgeBase.getWikiSection(cityWiki, "Climate");
+                    resp = (resp != null) ? resp : DONT_KNOW;
+                    return resp + ANOTHER_Q;
+                }
+                if (has(input, "safety", "safe", "crime", "criminality")) {
+                    String resp = KnowledgeBase.getWikiSection(cityWiki, "Stay safe");
                     resp = (resp != null) ? resp : DONT_KNOW;
                     return resp + ANOTHER_Q;
                 }
@@ -256,16 +264,35 @@ public class EmmaBrain {
             case CHOOSE_AIRPORT: {
                 if (has(input, "yes", "yep", "yo", "yeah", "of course", "sure")) {
                     airport = true;
+                    city = KnowledgeBase.getCity(continent, size, season, tempr, airport, rainy, sunny);
+                    if (city == null) {
+                        state = State.NO_CITY_MATCH;
+                        return "Sorry. I was unable to find a match...";
+                    }
+                    state = State.QUESTION_CITY;
+                    return "Looks like " + city + " is a perfect match! Do you have any question about it ?";
                 }
                 if (has(input, "no", "nope", "not really")) {
-                    airport = true;
+                    airport = false;
+                    city = KnowledgeBase.getCity(continent, size, season, tempr, airport, rainy, sunny);
+                    if (city == null) {
+                        state = State.NO_CITY_MATCH;
+                        return "Sorry. I was unable to find a match...";
+                    }
+                    state = State.QUESTION_CITY;
+                    return "Looks like " + city + " is a perfect match! Do you have any question about it ?";
                 }
                 if (has(input, "do not care", "don't care", "dont care", "doesn't matter", "does not matter", "no matter")) {
                     return WHATEVER;
+                } else {
+                    return "... I'll ask again: Should there be an airport ?";
                 }
-                return "... I'll ask again: Should there be an airport ?";
+
             }
 
+            case NO_CITY_MATCH: {
+                return "Sorry ... try again next time.";
+            }
 
             /*
              * ask user for season 
