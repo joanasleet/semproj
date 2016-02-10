@@ -4,10 +4,6 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import org.json.JSONObject;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 public class Test {
 
@@ -35,22 +31,22 @@ public class Test {
 
         wiki = wiki.replaceAll("\\\\n", "\n");
 
-        wiki = wiki.replaceAll("\\[{2}\\w+:[^\\]]+\\]{2}", ""); // strip file link
-        wiki = wiki.replaceAll("\\{{2}[^\\}]+\\}{2}", ""); // strip ref link
-        wiki = wiki.replaceAll("\\{[^\\}]+\\}", ""); // strip templates
-
-        wiki = wiki.replaceAll("\\[{2}", ""); // strip link
-        wiki = wiki.replaceAll("\\]{2}", ""); // strip link
-
-        wiki = wiki.replaceAll("\\[[^ ]+ ", ""); // strip file link
-        wiki = wiki.replaceAll("\\]", ""); // strip file link
-
-        wiki = wiki.replaceAll("''''", "\""); // text formatig
-        wiki = wiki.replaceAll("'''", "\""); // text formatig
-        wiki = wiki.replaceAll("''", "\""); // text formatig
-
-        wiki = wiki.replaceAll("[*][ ]?", "");
-        wiki = wiki.replaceAll("\n{3,}", "\n");
+//        wiki = wiki.replaceAll("\\[{2}\\w+:[^\\]]+\\]{2}", ""); // strip file link
+//        wiki = wiki.replaceAll("\\{{2}[^\\}]+\\}{2}", ""); // strip ref link
+//        wiki = wiki.replaceAll("\\{[^\\}]+\\}", ""); // strip templates
+//
+//        wiki = wiki.replaceAll("\\[{2}", ""); // strip link
+//        wiki = wiki.replaceAll("\\]{2}", ""); // strip link
+//
+//        wiki = wiki.replaceAll("\\[[^ ]+ ", ""); // strip file link
+//        wiki = wiki.replaceAll("\\]", ""); // strip file link
+//
+//        wiki = wiki.replaceAll("''''", "\""); // text formatig
+//        wiki = wiki.replaceAll("'''", "\""); // text formatig
+//        wiki = wiki.replaceAll("''", "\""); // text formatig
+//
+//        wiki = wiki.replaceAll("[*][ ]?", "");
+//        wiki = wiki.replaceAll("\n{3,}", "\n");
         System.out.println(wiki);
     }
 

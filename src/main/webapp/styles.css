@@ -6,9 +6,13 @@ body {
     margin: 0;
 }
 
+td {
+    vertical-align: initial;
+}
+
 #title {
     margin: 0;
-    padding: 0.5em;
+    padding: 0.25em;
     text-align: center;
 
     font-size: 4em;
@@ -47,19 +51,24 @@ body {
     height: 0.5em;
 }
 
+#topics {
+    font-size: 0.8em;
+    color: gray;
+}
+
 #content {
-    width: 700px;
+    width: 760px;
     padding: 1em;
-    margin-top: 4em;
+    margin-top: 2em;
     margin-left: auto;
     margin-right: auto;
     background-color: #92CCFF;
     border-radius: 10px 10px 10px 10px;
 
-    font-size: 1.2em;
+    font-size: 1.3em;
 }
 
 #userText > input {
-    width: 50%;
+    width: 100%;
     vertical-align: middle;
 }
