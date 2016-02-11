@@ -315,6 +315,42 @@ public class KnowledgeBase {
         return null;
     }
 
+    public static double[] getLoc(String wikipage) {
+
+        String query = "PREFIX dbr: <http://dbpedia.org/resource/>\n"
+                + "PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>\n"
+                + "\n"
+                + "SELECT DISTINCT ?lat ?long \n"
+                + "WHERE {\n"
+                + " dbr:%s geo:lat ?lat .\n"
+                + " dbr:%s geo:long ?long .\n"
+                + "}";
+        query = String.format(query, wikipage, wikipage);
+
+        JsonNode node = KnowledgeBase.askDBpedia(query);
+
+        if (node == null) {
+            return null;
+        }
+
+        JSONObject jsobj = node.getObject();
+
+        if (jsobj == null) {
+            return null;
+        }
+
+        JSONObject results = jsobj.getJSONObject("results");
+        JSONArray bindings = results.getJSONArray("bindings");
+
+        if (bindings.length() == 0) {
+            return null;
+        }
+
+        double lat = bindings.getJSONObject(0).getJSONObject("lat").getDouble("value");
+        double lon = bindings.getJSONObject(0).getJSONObject("long").getDouble("value");
+
+        return new double[]{lat, lon};
+    }
 }
 
 // Google Maps API key:   AIzaSyBbB8aOymNe97b6oFSG0-X21NDHVWLPgvg

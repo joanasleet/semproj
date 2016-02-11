@@ -23,6 +23,7 @@ import de.codeception.semproj.knowledge.Util;
 import static de.codeception.semproj.knowledge.Util.has;
 import static de.codeception.semproj.knowledge.Util.rand;
 import java.util.HashMap;
+import java.util.Locale;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -199,6 +200,9 @@ public class EmmaBrain {
                 if (answ != null) {
                     answ = answ.substring(0, Math.min(500, answ.length() - 1));
                     return answ + ANOTHER_Q + topics();
+                }
+                if (has(input, "map", "location", "located")) {
+                    return map() + topics();
                 }
                 if (has(input, "yes", "yep", "yo", "yeah", "of course", "sure")) {
                     return "Ask away!" + topics();
@@ -398,8 +402,8 @@ public class EmmaBrain {
                 if (has(input, "yes", "yep", "yo", "yeah", "of course", "sure")) {
                     sunny = true;
                     state = State.CHOOSE_AIRPORT;
-                    return rand("Great! I am always in a good mood when the sun is shining"
-                            + "Final question: Is an airport important to you ?",
+                    return rand("Great! I am always in a good mood when the sun is shining."
+                            + " Final question: Is an airport important to you ?",
                             "Perfect. Should the city be reachable by plane ?");
                 }
                 if (has(input, "no", "nope", "not really")) {
@@ -456,8 +460,25 @@ public class EmmaBrain {
         for (int i = 1; i < keys.length; i++) {
             wkeys += "|" + keys[i];
         }
-        wkeys += ")";
+        wkeys += "|map|location)";
         return wkeys;
+    }
+
+    private String map() {
+
+        Locale.setDefault(Locale.ENGLISH);
+
+        double[] loc = KnowledgeBase.getLoc(wikiPage);
+
+        if (loc == null) {
+            return "Oops, I don't know where that is...";
+        }
+
+        String map = "<iframe width='600' height='250' frameborder='0' style='border:0' "
+                + "src='https://www.google.com/maps/embed/v1/view?key=AIzaSyBbB8aOymNe97b6oFSG0-X21NDHVWLPgvg"
+                + "&center=%.4f,%.4f&zoom=9' </iframe>";
+
+        return String.format(map, loc[0], loc[1]);
     }
 
     private String topics() {
